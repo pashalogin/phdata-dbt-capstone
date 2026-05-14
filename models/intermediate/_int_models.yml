@@ -1,0 +1,47 @@
+version: 2
+
+models:
+  - name: int_order_items
+    description: >
+      Order line items enriched with order header dates, status, and product cost data.
+      Grain: one row per order line (order_number + product_code).
+    access: protected
+    columns:
+      - name: order_number
+        description: "FK — parent order."
+        tests:
+          - not_null
+      - name: product_code
+        description: "FK — product on this line."
+        tests:
+          - not_null
+      - name: order_line_number
+        description: "Sequence number of this line within the order."
+        tests:
+          - not_null
+      - name: quantity_ordered
+        description: "Number of units ordered."
+        tests:
+          - not_null
+      - name: price_each
+        description: "Unit selling price at time of order."
+        tests:
+          - not_null
+      - name: line_revenue
+        description: "Total revenue for this line (quantity × price_each)."
+      - name: line_cost
+        description: "Total cost for this line (quantity × buy_price)."
+      - name: line_gross_profit
+        description: "Gross profit for this line (line_revenue − line_cost)."
+      - name: order_date
+        description: "Date the parent order was placed."
+      - name: required_date
+        description: "Date by which delivery was required."
+      - name: shipped_date
+        description: "Date the order was shipped."
+      - name: order_status
+        description: "Fulfillment status of the parent order."
+      - name: customer_number
+        description: "FK — customer who placed the order."
+        tests:
+          - not_null

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dbt build *)",
+      "Bash(dbt debug *)"
+    ]
+  }
+}

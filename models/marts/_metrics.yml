@@ -1,0 +1,135 @@
+version: 2
+
+semantic_models:
+  - name: orders
+    description: "Order line item semantic model. Grain: one row per order line (order + product)."
+    model: ref('fct_orders')
+    entities:
+      - name: order_item
+        type: primary
+        expr: order_item_key
+      - name: customer
+        type: foreign
+        expr: customer_key
+      - name: product
+        type: foreign
+        expr: product_key
+    dimensions:
+      - name: order_status
+        type: categorical
+        description: "Fulfillment status of the order."
+      - name: order_date
+        type: time
+        label: "Order Date"
+        description: "Date the order was placed, derived from the integer date key."
+        type_params:
+          time_granularity: day
+        expr: "TO_DATE(CAST(order_date_key AS VARCHAR), 'YYYYMMDD')"
+    measures:
+      - name: total_revenue
+        description: "Sum of line-level revenue."
+        agg: sum
+        expr: line_revenue
+        agg_time_dimension: order_date
+      - name: total_cost
+        description: "Sum of line-level cost."
+        agg: sum
+        expr: line_cost
+        agg_time_dimension: order_date
+      - name: total_gross_profit
+        description: "Sum of line-level gross profit."
+        agg: sum
+        expr: line_gross_profit
+        agg_time_dimension: order_date
+      - name: total_quantity_ordered
+        description: "Sum of units ordered."
+        agg: sum
+        expr: quantity_ordered
+        agg_time_dimension: order_date
+      - name: order_count
+        description: "Count of distinct orders."
+        agg: count_distinct
+        expr: order_number
+        agg_time_dimension: order_date
+
+  - name: payments
+    description: "Customer payment transaction semantic model. Grain: one row per payment."
+    model: ref('fct_payments')
+    entities:
+      - name: payment
+        type: primary
+        expr: payment_key
+      - name: customer
+        type: foreign
+        expr: customer_key
+    dimensions:
+      - name: payment_date
+        type: time
+        label: "Payment Date"
+        description: "Date the payment was received, derived from the integer date key."
+        type_params:
+          time_granularity: day
+        expr: "TO_DATE(CAST(payment_date_key AS VARCHAR), 'YYYYMMDD')"
+    measures:
+      - name: total_payment_amount
+        description: "Sum of all payment amounts."
+        agg: sum
+        expr: amount
+        agg_time_dimension: payment_date
+      - name: payment_count
+        description: "Count of distinct payment transactions."
+        agg: count_distinct
+        expr: payment_key
+        agg_time_dimension: payment_date
+
+metrics:
+  - name: total_revenue
+    label: "Total Revenue"
+    description: "Sum of line-level revenue across all order items."
+    type: simple
+    type_params:
+      measure: total_revenue
+
+  - name: total_gross_profit
+    label: "Total Gross Profit"
+    description: "Sum of line-level gross profit (revenue minus cost) across all order items."
+    type: simple
+    type_params:
+      measure: total_gross_profit
+
+  - name: total_orders
+    label: "Total Orders"
+    description: "Count of distinct orders placed."
+    type: simple
+    type_params:
+      measure: order_count
+
+  - name: total_quantity_ordered
+    label: "Total Quantity Ordered"
+    description: "Total number of units ordered across all order line items."
+    type: simple
+    type_params:
+      measure: total_quantity_ordered
+
+  - name: total_payment_collected
+    label: "Total Payment Collected"
+    description: "Sum of all customer payment amounts received."
+    type: simple
+    type_params:
+      measure: total_payment_amount
+
+  - name: average_revenue_per_order
+    label: "Average Revenue per Order"
+    description: "Total line revenue divided by the number of distinct orders."
+    type: ratio
+    type_params:
+      numerator: total_revenue
+      denominator: total_orders
+
+  - name: gross_profit_margin
+    label: "Gross Profit Margin"
+    description: "Gross profit as a ratio of total revenue — measures overall profitability."
+    type: ratio
+    type_params:
+      numerator: total_gross_profit
+      denominator: total_revenue

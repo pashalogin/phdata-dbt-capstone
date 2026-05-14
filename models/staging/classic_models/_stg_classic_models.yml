@@ -1,0 +1,222 @@
+version: 2
+
+models:
+  - name: stg_classic_models__customers
+    description: "Staged customer records with renamed and typed columns."
+    access: protected
+    columns:
+      - name: customer_number
+        description: "Unique identifier for each customer."
+        tests:
+          - unique
+          - not_null
+      - name: customer_name
+        description: "Full business name of the customer."
+        tests:
+          - not_null
+      - name: contact_last_name
+        description: "Last name of the primary contact."
+      - name: contact_first_name
+        description: "First name of the primary contact."
+      - name: phone
+        description: "Customer contact phone number."
+      - name: address_line_1
+        description: "Primary street address."
+      - name: address_line_2
+        description: "Secondary address line (suite, floor, etc.)."
+      - name: city
+        description: "City of the customer's address."
+      - name: state
+        description: "State or province of the customer's address."
+      - name: postal_code
+        description: "Postal or ZIP code."
+      - name: country
+        description: "Country of the customer's address."
+      - name: sales_rep_employee_number
+        description: "Employee number of the assigned sales representative."
+      - name: credit_limit
+        description: "Maximum credit extended to this customer."
+
+  - name: stg_classic_models__orders
+    description: "Staged order header records."
+    access: protected
+    columns:
+      - name: order_number
+        description: "Unique identifier for each order."
+        tests:
+          - unique
+          - not_null
+      - name: order_date
+        description: "Date the order was placed."
+        tests:
+          - not_null
+      - name: required_date
+        description: "Date by which the customer requires delivery."
+      - name: shipped_date
+        description: "Date the order was shipped (null if not yet shipped)."
+      - name: order_status
+        description: "Current fulfillment status of the order."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Shipped', 'Resolved', 'Cancelled', 'On Hold', 'Disputed', 'In Process']
+      - name: comments
+        description: "Free-text notes attached to the order."
+      - name: customer_number
+        description: "FK — customer who placed the order."
+        tests:
+          - not_null
+
+  - name: stg_classic_models__order_details
+    description: "Staged order line-item records."
+    access: protected
+    columns:
+      - name: order_number
+        description: "FK to orders."
+        tests:
+          - not_null
+      - name: product_code
+        description: "FK to products."
+        tests:
+          - not_null
+      - name: quantity_ordered
+        description: "Number of units ordered."
+        tests:
+          - not_null
+      - name: price_each
+        description: "Unit price negotiated at time of order."
+        tests:
+          - not_null
+      - name: order_line_number
+        description: "Sequence number of this line within the order."
+        tests:
+          - not_null
+
+  - name: stg_classic_models__products
+    description: "Staged product catalog with pricing and inventory."
+    access: protected
+    columns:
+      - name: product_code
+        description: "Unique identifier for each product."
+        tests:
+          - unique
+          - not_null
+      - name: product_name
+        description: "Display name of the product."
+        tests:
+          - not_null
+      - name: product_line
+        description: "FK — product category name."
+        tests:
+          - not_null
+      - name: product_scale
+        description: "Scale of the model (e.g. 1:10, 1:18)."
+      - name: product_vendor
+        description: "Supplier / vendor of the product."
+      - name: product_description
+        description: "Long-form product description."
+      - name: quantity_in_stock
+        description: "Current inventory count."
+      - name: buy_price
+        description: "Wholesale cost per unit."
+      - name: msrp
+        description: "Manufacturer's suggested retail price."
+
+  - name: stg_classic_models__product_lines
+    description: "Staged product line (category) reference data."
+    access: protected
+    columns:
+      - name: product_line
+        description: "Unique name of the product line."
+        tests:
+          - unique
+          - not_null
+      - name: text_description
+        description: "Plain-text description of the product line."
+      - name: html_description
+        description: "HTML-formatted description of the product line."
+
+  - name: stg_classic_models__employees
+    description: "Staged employee records including reporting hierarchy."
+    access: protected
+    columns:
+      - name: employee_number
+        description: "Unique identifier for each employee."
+        tests:
+          - unique
+          - not_null
+      - name: last_name
+        description: "Employee last name."
+        tests:
+          - not_null
+      - name: first_name
+        description: "Employee first name."
+        tests:
+          - not_null
+      - name: extension
+        description: "Internal phone extension."
+      - name: email
+        description: "Corporate email address."
+        tests:
+          - not_null
+      - name: office_code
+        description: "FK — office where the employee is based."
+        tests:
+          - not_null
+      - name: reports_to_employee_number
+        description: "Employee number of this person's direct manager (null for top-level)."
+      - name: job_title
+        description: "Job title of the employee."
+        tests:
+          - not_null
+
+  - name: stg_classic_models__offices
+    description: "Staged office location reference data."
+    access: protected
+    columns:
+      - name: office_code
+        description: "Unique identifier for each office."
+        tests:
+          - unique
+          - not_null
+      - name: city
+        description: "City where the office is located."
+        tests:
+          - not_null
+      - name: phone
+        description: "Main phone number for the office."
+      - name: address_line_1
+        description: "Primary street address of the office."
+      - name: address_line_2
+        description: "Secondary address line."
+      - name: state
+        description: "State or province."
+      - name: country
+        description: "Country of the office."
+        tests:
+          - not_null
+      - name: postal_code
+        description: "Postal or ZIP code."
+      - name: territory
+        description: "Sales territory the office belongs to."
+
+  - name: stg_classic_models__payments
+    description: "Staged customer payment transactions."
+    access: protected
+    columns:
+      - name: customer_number
+        description: "FK — customer who made the payment."
+        tests:
+          - not_null
+      - name: check_number
+        description: "Reference number for the payment instrument."
+        tests:
+          - not_null
+      - name: payment_date
+        description: "Date the payment was received."
+        tests:
+          - not_null
+      - name: amount
+        description: "Payment amount."
+        tests:
+          - not_null

@@ -1,0 +1,39 @@
+version: 2
+
+exposures:
+  - name: classicmodels_sales_dashboard
+    label: "ClassicModels Sales Dashboard"
+    type: dashboard
+    maturity: high
+    description: >
+      Executive sales dashboard showing order revenue, gross profit, payment
+      collections, and product performance over time. Consumes the full
+      ClassicModels star schema — dimensions for customers, products, employees,
+      offices, and dates joined to the fct_orders and fct_payments fact tables.
+    url: "https://app.phdata.io/dashboards/classicmodels-sales"
+    depends_on:
+      - ref('fct_orders')
+      - ref('fct_payments')
+      - ref('dim_customers')
+      - ref('dim_products')
+      - ref('dim_employees')
+      - ref('dim_offices')
+      - ref('dim_dates')
+    owner:
+      name: "Analytics Engineering"
+      email: "pshaik@phdata.io"
+
+  - name: classicmodels_inventory_report
+    label: "ClassicModels Inventory & Product Report"
+    type: analysis
+    maturity: medium
+    description: >
+      Product and inventory analysis report used by the merchandising team.
+      Tracks quantity in stock, MSRP vs buy price margins, and order volume
+      by product line.
+    depends_on:
+      - ref('fct_orders')
+      - ref('dim_products')
+    owner:
+      name: "Analytics Engineering"
+      email: "pshaik@phdata.io"

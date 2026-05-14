@@ -1,0 +1,414 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: >
+      Customer dimension. One row per customer. Includes contact information,
+      address, credit limit, and assigned sales representative.
+    access: public
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: customer_key
+        description: "Surrogate key — MD5 hash of customer_number."
+        data_type: varchar
+        tests:
+          - unique
+          - not_null
+      - name: customer_number
+        description: "Natural key — source system customer identifier."
+        data_type: number
+        tests:
+          - unique
+          - not_null
+      - name: customer_name
+        description: "Full business name of the customer."
+        data_type: varchar
+        tests:
+          - not_null
+      - name: contact_last_name
+        description: "Last name of the primary contact."
+        data_type: varchar
+      - name: contact_first_name
+        description: "First name of the primary contact."
+        data_type: varchar
+      - name: phone
+        description: "Customer contact phone number."
+        data_type: varchar
+      - name: address_line_1
+        description: "Primary street address."
+        data_type: varchar
+      - name: address_line_2
+        description: "Secondary address line."
+        data_type: varchar
+      - name: city
+        description: "City of the customer's address."
+        data_type: varchar
+      - name: state
+        description: "State or province."
+        data_type: varchar
+      - name: postal_code
+        description: "Postal or ZIP code."
+        data_type: varchar
+      - name: country
+        description: "Country of the customer's address."
+        data_type: varchar
+      - name: credit_limit
+        description: "Maximum credit extended to this customer."
+        data_type: number
+      - name: sales_rep_employee_number
+        description: "Employee number of the assigned sales representative."
+        data_type: number
+
+  - name: dim_products
+    description: >
+      Product dimension. One row per product. Enriched with product line
+      description joined from the product lines reference table.
+    access: public
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: product_key
+        description: "Surrogate key — MD5 hash of product_code."
+        data_type: varchar
+        tests:
+          - unique
+          - not_null
+      - name: product_code
+        description: "Natural key — source system product identifier."
+        data_type: varchar
+        tests:
+          - unique
+          - not_null
+      - name: product_name
+        description: "Display name of the product."
+        data_type: varchar
+        tests:
+          - not_null
+      - name: product_line
+        description: "Product category name."
+        data_type: varchar
+        tests:
+          - not_null
+      - name: product_line_description
+        description: "Plain-text description of the product line category."
+        data_type: varchar
+      - name: product_scale
+        description: "Scale of the model (e.g. 1:10, 1:18)."
+        data_type: varchar
+      - name: product_vendor
+        description: "Supplier / vendor of the product."
+        data_type: varchar
+      - name: product_description
+        description: "Long-form product description."
+        data_type: varchar
+      - name: quantity_in_stock
+        description: "Current inventory count."
+        data_type: number
+      - name: buy_price
+        description: "Wholesale cost per unit."
+        data_type: number
+      - name: msrp
+        description: "Manufacturer's suggested retail price."
+        data_type: number
+
+  - name: dim_employees
+    description: >
+      Employee dimension. One row per employee. Includes full name,
+      job title, office assignment, and management reporting hierarchy.
+    access: public
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: employee_key
+        description: "Surrogate key — MD5 hash of employee_number."
+        data_type: varchar
+        tests:
+          - unique
+          - not_null
+      - name: employee_number
+        description: "Natural key — source system employee identifier."
+        data_type: number
+        tests:
+          - unique
+          - not_null
+      - name: last_name
+        description: "Employee last name."
+        data_type: varchar
+        tests:
+          - not_null
+      - name: first_name
+        description: "Employee first name."
+        data_type: varchar
+        tests:
+          - not_null
+      - name: full_name
+        description: "Formatted full name (last, first)."
+        data_type: varchar
+      - name: email
+        description: "Corporate email address."
+        data_type: varchar
+        tests:
+          - not_null
+      - name: extension
+        description: "Internal phone extension."
+        data_type: varchar
+      - name: job_title
+        description: "Job title of the employee."
+        data_type: varchar
+        tests:
+          - not_null
+      - name: office_code
+        description: "FK — office where the employee is based."
+        data_type: varchar
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_offices')
+              field: office_code
+      - name: reports_to_employee_number
+        description: "Employee number of the direct manager (null for the top-level executive)."
+        data_type: number
+
+  - name: dim_offices
+    description: >
+      Office dimension. One row per office location.
+      Includes full address and sales territory assignment.
+    access: public
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: office_key
+        description: "Surrogate key — MD5 hash of office_code."
+        data_type: varchar
+        tests:
+          - unique
+          - not_null
+      - name: office_code
+        description: "Natural key — source system office identifier."
+        data_type: varchar
+        tests:
+          - unique
+          - not_null
+      - name: city
+        description: "City where the office is located."
+        data_type: varchar
+        tests:
+          - not_null
+      - name: phone
+        description: "Main phone number for the office."
+        data_type: varchar
+      - name: address_line_1
+        description: "Primary street address of the office."
+        data_type: varchar
+      - name: address_line_2
+        description: "Secondary address line."
+        data_type: varchar
+      - name: state
+        description: "State or province."
+        data_type: varchar
+      - name: country
+        description: "Country of the office."
+        data_type: varchar
+        tests:
+          - not_null
+      - name: postal_code
+        description: "Postal or ZIP code."
+        data_type: varchar
+      - name: territory
+        description: "Sales territory the office belongs to."
+        data_type: varchar
+
+  - name: dim_dates
+    description: >
+      Date dimension covering 2000-01-01 through 2029-12-31.
+      Generated from Snowflake's GENERATOR function — no source dependency.
+      Also serves as the MetricFlow time spine for the semantic layer.
+    access: public
+    time_spine:
+      standard_granularity_column: date_day
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: date_key
+        description: "Integer surrogate key in YYYYMMDD format."
+        data_type: number
+        tests:
+          - unique
+          - not_null
+      - name: date_day
+        description: "Calendar date value."
+        data_type: date
+        granularity: day
+        tests:
+          - unique
+          - not_null
+      - name: day_of_week_number
+        description: "Day of week (0 = Sunday … 6 = Saturday in Snowflake DAYOFWEEK)."
+        data_type: number
+      - name: day_of_week_name
+        description: "Abbreviated day name (Mon, Tue, …)."
+        data_type: varchar
+      - name: day_of_month
+        description: "Day number within the month (1–31)."
+        data_type: number
+      - name: day_of_year
+        description: "Day number within the year (1–366)."
+        data_type: number
+      - name: week_of_year
+        description: "ISO week number within the year."
+        data_type: number
+      - name: month_number
+        description: "Month number (1–12)."
+        data_type: number
+      - name: month_name
+        description: "Abbreviated month name (Jan, Feb, …)."
+        data_type: varchar
+      - name: quarter_number
+        description: "Fiscal quarter (1–4)."
+        data_type: number
+      - name: quarter_label
+        description: "Human-readable label, e.g. Q3 2024."
+        data_type: varchar
+      - name: year_number
+        description: "Four-digit year."
+        data_type: number
+      - name: is_weekend
+        description: "true if the date falls on Saturday or Sunday."
+        data_type: boolean
+
+  - name: fct_orders
+    description: >
+      Order fact table. Grain: one row per order line item (order + product).
+      Links to dim_customers, dim_products, and dim_dates (order, required, shipped).
+      Includes revenue, cost, and gross profit metrics at line level.
+    access: public
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: order_item_key
+        description: "Surrogate key — MD5 hash of order_number + product_code."
+        data_type: varchar
+        tests:
+          - unique
+          - not_null
+      - name: order_number
+        description: "Source order identifier."
+        data_type: number
+        tests:
+          - not_null
+      - name: order_line_number
+        description: "Sequence number of this line within the order."
+        data_type: number
+        tests:
+          - not_null
+      - name: customer_key
+        description: "FK to dim_customers."
+        data_type: varchar
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_key
+      - name: product_key
+        description: "FK to dim_products."
+        data_type: varchar
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_products')
+              field: product_key
+      - name: order_date_key
+        description: "FK to dim_dates — date the order was placed."
+        data_type: number
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_dates')
+              field: date_key
+      - name: required_date_key
+        description: "FK to dim_dates — date delivery was required."
+        data_type: number
+        tests:
+          - relationships:
+              to: ref('dim_dates')
+              field: date_key
+      - name: shipped_date_key
+        description: "FK to dim_dates — date the order shipped (null if not yet shipped)."
+        data_type: number
+        tests:
+          - relationships:
+              to: ref('dim_dates')
+              field: date_key
+      - name: order_status
+        description: "Fulfillment status of the order."
+        data_type: varchar
+        tests:
+          - not_null
+      - name: quantity_ordered
+        description: "Number of units ordered on this line."
+        data_type: number
+        tests:
+          - not_null
+      - name: price_each
+        description: "Unit selling price at time of order."
+        data_type: number
+        tests:
+          - not_null
+      - name: line_revenue
+        description: "Total revenue for this line (quantity × price_each)."
+        data_type: number
+      - name: line_cost
+        description: "Total cost for this line (quantity × buy_price)."
+        data_type: number
+      - name: line_gross_profit
+        description: "Gross profit for this line (line_revenue − line_cost)."
+        data_type: number
+
+  - name: fct_payments
+    description: >
+      Payment fact table. Grain: one row per payment transaction (customer + check_number).
+      Links to dim_customers and dim_dates.
+    access: public
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: payment_key
+        description: "Surrogate key — MD5 hash of customer_number + check_number."
+        data_type: varchar
+        tests:
+          - unique
+          - not_null
+      - name: customer_key
+        description: "FK to dim_customers."
+        data_type: varchar
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_key
+      - name: payment_date_key
+        description: "FK to dim_dates."
+        data_type: number
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_dates')
+              field: date_key
+      - name: check_number
+        description: "Reference number for the payment instrument."
+        data_type: varchar
+        tests:
+          - not_null
+      - name: amount
+        description: "Payment amount."
+        data_type: number
+        tests:
+          - not_null
