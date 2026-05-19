@@ -25,7 +25,7 @@ joined AS (
         o.required_date,
         o.shipped_date,
         o.order_status,
-        o.customer_number
+        o.customer_number AS customer_number
     FROM order_details AS od
     INNER JOIN orders AS o
         ON od.order_number = o.order_number
