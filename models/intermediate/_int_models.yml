@@ -5,7 +5,6 @@ models:
     description: >
       Order line items enriched with order header dates, status, and product cost data.
       Grain: one row per order line (order_number + product_code).
-    access: protected
     columns:
       - name: order_number
         description: "FK — parent order."
@@ -45,3 +44,5 @@ models:
         description: "FK — customer who placed the order."
         tests:
           - not_null
+    config:
+      access: protected

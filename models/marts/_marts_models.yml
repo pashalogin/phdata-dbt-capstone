@@ -5,10 +5,10 @@ models:
     description: >
       Customer dimension. One row per customer. Includes contact information,
       address, credit limit, and assigned sales representative.
-    access: public
     config:
       contract:
         enforced: true
+      access: public
     columns:
       - name: customer_key
         description: "Surrogate key — MD5 hash of customer_number."
@@ -65,10 +65,10 @@ models:
     description: >
       Product dimension. One row per product. Enriched with product line
       description joined from the product lines reference table.
-    access: public
     config:
       contract:
         enforced: true
+      access: public
     columns:
       - name: product_key
         description: "Surrogate key — MD5 hash of product_code."
@@ -118,10 +118,10 @@ models:
     description: >
       Employee dimension. One row per employee. Includes full name,
       job title, office assignment, and management reporting hierarchy.
-    access: public
     config:
       contract:
         enforced: true
+      access: public
     columns:
       - name: employee_key
         description: "Surrogate key — MD5 hash of employee_number."
@@ -167,8 +167,9 @@ models:
         tests:
           - not_null
           - relationships:
-              to: ref('dim_offices')
-              field: office_code
+              arguments:
+                to: ref('dim_offices')
+                field: office_code
       - name: reports_to_employee_number
         description: "Employee number of the direct manager (null for the top-level executive)."
         data_type: number
@@ -177,10 +178,10 @@ models:
     description: >
       Office dimension. One row per office location.
       Includes full address and sales territory assignment.
-    access: public
     config:
       contract:
         enforced: true
+      access: public
     columns:
       - name: office_key
         description: "Surrogate key — MD5 hash of office_code."
@@ -228,12 +229,12 @@ models:
       Date dimension covering 2000-01-01 through 2029-12-31.
       Generated from Snowflake's GENERATOR function — no source dependency.
       Also serves as the MetricFlow time spine for the semantic layer.
-    access: public
     time_spine:
       standard_granularity_column: date_day
     config:
       contract:
         enforced: true
+      access: public
     columns:
       - name: date_key
         description: "Integer surrogate key in YYYYMMDD format."
@@ -287,10 +288,10 @@ models:
       Order fact table. Grain: one row per order line item (order + product).
       Links to dim_customers, dim_products, and dim_dates (order, required, shipped).
       Includes revenue, cost, and gross profit metrics at line level.
-    access: public
     config:
       contract:
         enforced: true
+      access: public
     columns:
       - name: order_item_key
         description: "Surrogate key — MD5 hash of order_number + product_code."
@@ -314,38 +315,43 @@ models:
         tests:
           - not_null
           - relationships:
-              to: ref('dim_customers')
-              field: customer_key
+              arguments:
+                to: ref('dim_customers')
+                field: customer_key
       - name: product_key
         description: "FK to dim_products."
         data_type: varchar
         tests:
           - not_null
           - relationships:
-              to: ref('dim_products')
-              field: product_key
+              arguments:
+                to: ref('dim_products')
+                field: product_key
       - name: order_date_key
         description: "FK to dim_dates — date the order was placed."
         data_type: number
         tests:
           - not_null
           - relationships:
-              to: ref('dim_dates')
-              field: date_key
+              arguments:
+                to: ref('dim_dates')
+                field: date_key
       - name: required_date_key
         description: "FK to dim_dates — date delivery was required."
         data_type: number
         tests:
           - relationships:
-              to: ref('dim_dates')
-              field: date_key
+              arguments:
+                to: ref('dim_dates')
+                field: date_key
       - name: shipped_date_key
         description: "FK to dim_dates — date the order shipped (null if not yet shipped)."
         data_type: number
         tests:
           - relationships:
-              to: ref('dim_dates')
-              field: date_key
+              arguments:
+                to: ref('dim_dates')
+                field: date_key
       - name: order_status
         description: "Fulfillment status of the order."
         data_type: varchar
@@ -375,10 +381,10 @@ models:
     description: >
       Payment fact table. Grain: one row per payment transaction (customer + check_number).
       Links to dim_customers and dim_dates.
-    access: public
     config:
       contract:
         enforced: true
+      access: public
     columns:
       - name: payment_key
         description: "Surrogate key — MD5 hash of customer_number + check_number."
@@ -392,16 +398,18 @@ models:
         tests:
           - not_null
           - relationships:
-              to: ref('dim_customers')
-              field: customer_key
+              arguments:
+                to: ref('dim_customers')
+                field: customer_key
       - name: payment_date_key
         description: "FK to dim_dates."
         data_type: number
         tests:
           - not_null
           - relationships:
-              to: ref('dim_dates')
-              field: date_key
+              arguments:
+                to: ref('dim_dates')
+                field: date_key
       - name: check_number
         description: "Reference number for the payment instrument."
         data_type: varchar

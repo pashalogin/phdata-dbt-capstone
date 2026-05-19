@@ -53,3 +53,4 @@ logs
 target
 dbt_packages
 profiles.yml
+dbt_internal_packages/
