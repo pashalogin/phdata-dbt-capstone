@@ -3,7 +3,6 @@ version: 2
 models:
   - name: stg_classic_models__customers
     description: "Staged customer records with renamed and typed columns."
-    access: protected
     columns:
       - name: customer_number
         description: "Unique identifier for each customer."
@@ -37,9 +36,10 @@ models:
       - name: credit_limit
         description: "Maximum credit extended to this customer."
 
+    config:
+      access: protected
   - name: stg_classic_models__orders
     description: "Staged order header records."
-    access: protected
     columns:
       - name: order_number
         description: "Unique identifier for each order."
@@ -59,7 +59,8 @@ models:
         tests:
           - not_null
           - accepted_values:
-              values: ['Shipped', 'Resolved', 'Cancelled', 'On Hold', 'Disputed', 'In Process']
+              arguments:
+                values: ['Shipped', 'Resolved', 'Cancelled', 'On Hold', 'Disputed', 'In Process']
       - name: comments
         description: "Free-text notes attached to the order."
       - name: customer_number
@@ -67,9 +68,10 @@ models:
         tests:
           - not_null
 
+    config:
+      access: protected
   - name: stg_classic_models__order_details
     description: "Staged order line-item records."
-    access: protected
     columns:
       - name: order_number
         description: "FK to orders."
@@ -92,9 +94,10 @@ models:
         tests:
           - not_null
 
+    config:
+      access: protected
   - name: stg_classic_models__products
     description: "Staged product catalog with pricing and inventory."
-    access: protected
     columns:
       - name: product_code
         description: "Unique identifier for each product."
@@ -122,9 +125,10 @@ models:
       - name: msrp
         description: "Manufacturer's suggested retail price."
 
+    config:
+      access: protected
   - name: stg_classic_models__product_lines
     description: "Staged product line (category) reference data."
-    access: protected
     columns:
       - name: product_line
         description: "Unique name of the product line."
@@ -136,9 +140,10 @@ models:
       - name: html_description
         description: "HTML-formatted description of the product line."
 
+    config:
+      access: protected
   - name: stg_classic_models__employees
     description: "Staged employee records including reporting hierarchy."
-    access: protected
     columns:
       - name: employee_number
         description: "Unique identifier for each employee."
@@ -170,9 +175,10 @@ models:
         tests:
           - not_null
 
+    config:
+      access: protected
   - name: stg_classic_models__offices
     description: "Staged office location reference data."
-    access: protected
     columns:
       - name: office_code
         description: "Unique identifier for each office."
@@ -200,9 +206,10 @@ models:
       - name: territory
         description: "Sales territory the office belongs to."
 
+    config:
+      access: protected
   - name: stg_classic_models__payments
     description: "Staged customer payment transactions."
-    access: protected
     columns:
       - name: customer_number
         description: "FK — customer who made the payment."
@@ -220,3 +227,5 @@ models:
         description: "Payment amount."
         tests:
           - not_null
+    config:
+      access: protected

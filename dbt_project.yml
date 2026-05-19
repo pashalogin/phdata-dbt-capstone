@@ -56,7 +56,7 @@ vars:
     documentation_coverage_target: 75
     test_coverage_target: 75
     # set constraints tests as primary key test
-    primary_key_test_macros: [["dbt.test_unique", "dbt.test_not_null"],["dbt_constraints.test_primary_key"]]
+    primary_key_test_macros: [["dbt.test_unique", "dbt.test_not_null"], ["dbt_constraints.test_primary_key"]]
     # set model types
     marts_folder_name: 'marts'
     marts_prefixes: ['dim_', 'fct_']
@@ -65,3 +65,5 @@ vars:
     # exclude packages
     exclude_packages: ["dbt_artifacts", "dbt_project_evaluator"]
     exclude_paths_from_project: ["/date_spine.sql"]
+flags:
+  require_generic_test_arguments_property: true
